@@ -28,10 +28,136 @@ In other words, via the code, we will expect that it will interpret the requests
 
 For e.g. if the query is "How much of P101 do we have in warehouse w101?", it should ideally indicate that we need to invoke the ```getInventoryCount``` method with the parameter name/value pairs of ```{location:w101}``` and ```{productId:P101}```
 
-Similarly, if the query is "Where are the following warehouses located: w10 and w1?", it should result in the program being told to invoke the ```getWarehouseDetails`` method twice, once with ```{location:w10}``` and then with ```{location:w1}```
+Similarly, if the query is "Where are the following warehouses located: w10 and w1?", it should result in the program being told to invoke the ```getWarehouseDetails`` method twice, once with ```{location:w10}``` and then with ```{location:w1}```th
 
 ## How do I run the code
-All the code is present in the ```src/main/java/com/geminidemo/AutomateFunctionCalling.java```. 
+All the code is present in the ```src/main/java/com/geminidemo/AutomateFunctionCalling.java```. This is a standard Maven project with a pom.xml in the root folder, so you should be able to take the dependencies from there, should you want to recreate it in the different way. 
+
+To run the Java main program, you will need to do the following in the ```src/main/java/com/geminidemo/AutomateFunctionCalling.java``` file:
+- Replace ```YOUR_GOOGLE_CLOUD_PROJECT_ID``` with your Google Project Id
+- Replace ```us-central1``` with another Google Cloud location should you want to change that.
+- In the ```main()``` method, you will find the different prompts all commented out. Uncomment any of the prompts before running the program.
+
+### Sample output #1
+For the prompt ```"How much of P1 and P2 do we have in warehouse w10?"```, we get the following output. You can see that we are being asked by the model to 
+invoke the ```getInventoryCount``` method twice. Once for ```P1``` and the other for ```P2```:
+
+```
+User provided Prompt: How much of P1 and P2 do we have in warehouse w10?
+Initial response: 
+role: "model"
+parts {
+  function_call {
+    name: "getInventoryCount"
+    args {
+      fields {
+        key: "location"
+        value {
+          string_value: "w10"
+        }
+      }
+      fields {
+        key: "productid"
+        value {
+          string_value: "P1"
+        }
+      }
+    }
+  }
+}
+
+Need to invoke function: getInventoryCount
+Executing function with parameters: P1 w10
+Response: role: "model"
+parts {
+  text: "We have 50 units of P1 in w10. \n\n"
+}
+parts {
+  function_call {
+    name: "getInventoryCount"
+    args {
+      fields {
+        key: "location"
+        value {
+          string_value: "w10"
+        }
+      }
+      fields {
+        key: "productid"
+        value {
+          string_value: "P2"
+        }
+      }
+    }
+  }
+}
+
+Need to invoke function: getInventoryCount
+Executing function with parameters: P2 w10
+Response: role: "model"
+parts {
+  text: "We also have 50 units of P2 in w10."
+}
+
+No more function calls found in response
+```
+### Sample output #2
+For the prompt ```"Where is warehouse w10 located and how many unit of p1 are there??"```, we get the following output. You can see that we are being asked by the model to 
+invoke the ```getWarehouseDetails``` method first with the warehouse location as ```w10``` and then we are asked to invoke the ```getInventoryCount``` method with the ```location``` as ```w10``` and the ```productId``` as ```p1```:
+
+```
+User provided Prompt: Where is warehouse w10 located and how many unit of p1 are there?
+Initial response: 
+role: "model"
+parts {
+  function_call {
+    name: "getWarehouseDetails"
+    args {
+      fields {
+        key: "location"
+        value {
+          string_value: "w10"
+        }
+      }
+    }
+  }
+}
+
+Need to invoke function: getWarehouseDetails
+Executing function with parameters: w10
+Response: role: "model"
+parts {
+  text: "w10 is located at 123 Main Street. \n\n"
+}
+parts {
+  function_call {
+    name: "getInventoryCount"
+    args {
+      fields {
+        key: "location"
+        value {
+          string_value: "w10"
+        }
+      }
+      fields {
+        key: "productid"
+        value {
+          string_value: "p1"
+        }
+      }
+    }
+  }
+}
+
+Need to invoke function: getInventoryCount
+Executing function with parameters: p1 w10
+Response: role: "model"
+parts {
+  text: "There are 50 units of p1 in w10."
+}
+
+No more function calls found in response
+```
 
 ## References
 - [Guillaume Laforge's article on Function calling](https://medium.com/google-cloud/gemini-function-calling-1585c044d28d)
