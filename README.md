@@ -166,7 +166,101 @@ From Gemini 1.5 Pro and Gemini 1.5 Flash models, *** the model model can propose
 
 I have provided another Java program in ```src/main/java/com/geminidemo/ParallelFunctionCalling.java``` and you will notice that we use another model here: ```gemini-1.5-pro-preview-0514```. 
 
+If you now run the following prompt in the sample, ```How much of P1 and P2 do we have in warehouse w10?``` , you will find the response output is now as follows:
 
+```
+role: "model"
+parts {
+  function_call {
+    name: "getInventoryCount"
+    args {
+      fields {
+        key: "location"
+        value {
+          string_value: "w10"
+        }
+      }
+      fields {
+        key: "productid"
+        value {
+          string_value: "P1"
+        }
+      }
+    }
+  }
+}
+parts {
+  function_call {
+    name: "getInventoryCount"
+    args {
+      fields {
+        key: "location"
+        value {
+          string_value: "w10"
+        }
+      }
+      fields {
+        key: "productid"
+        value {
+          string_value: "P2"
+        }
+      }
+    }
+  }
+}
+```
+You can see that in the initial response itself, we have 2 parts that are function calls. We can now parse this response and make the function calls in parallel and return back the response to the model for the final output. 
+
+The code also needed to be changed to iterate through each of the ```function_call``` responses and not just the first one. We iterate through the ```function_call```, invoke the function, collect the response and then send the aggregated response from our function call back into the model for the final response. 
+
+```
+// Handle cases with multiple chained function calls
+                        List<FunctionCall> functionCalls = response.getCandidatesList().stream()
+                                        .flatMap(candidate -> candidate.getContent().getPartsList().stream())
+                                        .filter(part -> part.getFunctionCall().getName().length() > 0)
+                                        .map(part -> part.getFunctionCall())
+                                        .collect(Collectors.toList());
+
+                        StringBuilder sb = new StringBuilder();
+                        for (FunctionCall functionCall : functionCalls) {
+                                String functionCallName = functionCall.getName();
+                                System.out.println("Need to invoke function: " + functionCallName);
+
+                                // Check for a function call or a natural language response
+                                if (function_handler.containsKey(functionCallName)) {
+                                        // Invoke the function using reflection
+                                        Object api_object = new MyAPI();
+                                        Method function_method = function_handler.get(functionCallName);
+
+                                        // Extract the function call parameters
+                                        Map<String, String> functionCallParameters = functionCall.getArgs()
+                                                        .getFieldsMap().entrySet()
+                                                        .stream()
+                                                        .collect(Collectors.toMap(
+                                                                        Map.Entry::getKey,
+                                                                        entry -> entry.getValue()
+                                                                                        .getStringValue()));
+
+                                        // Extract all the parameter values into an array
+                                        Object[] functionParameters = functionCallParameters.values().toArray();
+
+                                        Object result = function_method.invoke(api_object, functionParameters);
+                                        sb.append(result);
+
+                                }
+
+                        }
+                        // Send the API response back to Gemini, which will generate a natural
+                        // language summary or another function call
+                        Content content = ContentMaker.fromMultiModalData(
+                                        PartMaker.fromFunctionResponse(
+                                                        function_handler.entrySet().stream().findFirst()
+                                                                        .get().getKey(),
+                                                        Collections.singletonMap("content",
+                                                                        sb.toString())));
+                        response = chat.sendMessage(content);
+                        System.out.println("Response: " + ResponseHandler.getContent(response));
+```
 
 ## References
 - [Guillaume Laforge's article on Function calling](https://medium.com/google-cloud/gemini-function-calling-1585c044d28d)
