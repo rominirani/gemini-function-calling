@@ -32,10 +32,11 @@ public class AutomateFunctionCalling {
 
         //UNCOMMENT ANY OF THE send_chat_message methods below
         //send_chat_message("How much of P101 do we have in warehouse w101?");
+        //send_chat_message("Where is warehouse w1 located?");
+        //send_chat_message("Where are warehouse w1 and w2 located?");
         //send_chat_message("How much of P1 and P2 do we have in warehouse w10?");
-        //send_chat_message("Where are the following warehouses located: w10 and w1?");
+        //send_chat_message("What is the inventory P1, P2 and P3 in warehouse w101?");
         //send_chat_message("Where is warehouse w10 located and how many unit of p1 are there?");
-        //send_chat_message("For product id : P678, how much inventory of that do we have in warehouse w100");
     }
 
     private static void send_chat_message(String promptText)
@@ -165,9 +166,9 @@ public class AutomateFunctionCalling {
                     Content content = ContentMaker.fromMultiModalData(
                             PartMaker.fromFunctionResponse(
                                     functionCallName,
-                                    Collections.singletonMap("content", result.toString())));
+                                    Collections.singletonMap("content",  result.toString())));
                     response = chat.sendMessage(content);
-                    System.out.println("Response: " + ResponseHandler.getContent(response));
+                    System.out.println("Response: \n" + ResponseHandler.getContent(response));
                 } else {
                     function_calling_in_process = false;
                 }
