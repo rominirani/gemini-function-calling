@@ -159,6 +159,15 @@ parts {
 No more function calls found in response
 ```
 
+## Parallel Function Calling
+You would have noticed that the model response gives us a sequence of function calls to make one after the other. But if you look at it, it could have just determined that the functions can be invoked in parallel and could have given us a list of functions to invoke in the first original response itself. For e.g. if we had provided the following prompt: ```Where are warehouse w1 and w2 located?```, it should have given us two function calls that we need to make to getWarehouseLocation, one with warehouse location as ```w1``` and the other with warehouse location as ```w2```. In that case, we could have made both the API calls ourselves, collected the response and given it back to the model in one shot to form the final response. 
+
+From Gemini 1.5 Pro and Gemini 1.5 Flash models, *** the model model can proposed several parallel function calls ***. This means that we will need to modify our code to expect not just one function call or multiple ones that we will then need to make before handing the API results from those function calls back to the model. The documentation does highlight a [parallel function call sample](https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling#parallel-samples). 
+
+I have provided another Java program in ```src/main/java/com/geminidemo/ParallelFunctionCalling.java``` and you will notice that we use another model here: ```gemini-1.5-pro-preview-0514```. 
+
+
+
 ## References
 - [Guillaume Laforge's article on Function calling](https://medium.com/google-cloud/gemini-function-calling-1585c044d28d)
 - [Function calling documentation](https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling)
