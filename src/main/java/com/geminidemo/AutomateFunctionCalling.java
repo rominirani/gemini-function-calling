@@ -44,7 +44,7 @@ public class AutomateFunctionCalling {
 
         String projectId = "YOUR_GOOGLE_CLOUD_PROJECT_ID";  //REPLACE THIS VALUES WITH YOUR GOOGLE CLOUD PROJECT ID
         String location = "us-central1"; //REPLACE THIS VALUE WITH GOOGLE CLOUD PROJECT LOCATION
-        String modelName = "gemini-1.0-pro-002";
+        String modelName = "gemini-1.5-pro-001";
 
         // Building a map of functions to call
         Map<String, Method> function_handler = new HashMap<>();
