@@ -43,7 +43,7 @@ public class ParallelFunctionCalling {
 
                 String projectId = "YOUR-GOOGLE-CLOUD-PROJECT-ID"; // REPLACE THIS VALUES WITH YOUR GOOGLE CLOUD PROJECT ID
                 String location = "us-central1"; // REPLACE THIS VALUE WITH GOOGLE CLOUD PROJECT LOCATION
-                String modelName = "gemini-1.5-pro-preview-0514";
+                String modelName = "gemini-1.5-pro-001";
 
                 // Building a map of functions to call
                 Map<String, Method> function_handler = new HashMap<>();
